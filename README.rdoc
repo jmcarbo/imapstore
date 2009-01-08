@@ -1,32 +1,51 @@
 = imapstore
 
-* FIX (url)
+* http://wiki.github.com/jmcarbo/imapstore
 
 == DESCRIPTION:
 
-FIX (describe your package)
+ruby gem to use an imap server as a file storage device
 
 == FEATURES/PROBLEMS:
 
-* FIX (list of features or problems)
+* many
 
 == SYNOPSIS:
 
-  FIX (code sample of usage)
+Usage: imapstore -c <ls, rm, put, get, rmdir, mkdir, quota, setup> -s <subject> -d <folder> -f <file list or glob> 
+       imapstore -h
 
 == REQUIREMENTS:
 
-* FIX (list of requirements)
+* IMAP account
+* config file. Currently only supports this location: ~/.imapstore/config.yml
+* config file sample:
+
+email: account@gmail.com
+password: password
+store_tag: IMAPSTORE
+imap_server: imap.gmail.com
+imap_port: 993
+
+store_tag is the tag used in the message subject to distinguish imapstore created messages from any other messages in the
+store.
 
 == INSTALL:
 
-* FIX (sudo gem install, anything else)
+#install gem
+sudo gem install imapstore
+
+# Create sample config at ~/.imapstore/config.yml
+imapstore -c setup 
+
+# Show help
+imapstore -h
 
 == LICENSE:
 
 (The MIT License)
 
-Copyright (c) 2009 FIXME full name
+Copyright (c) 2009 Joan Marc Carbo Arnau
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
