@@ -6,8 +6,8 @@ describe "Configuration" do
   it "Should read configuration" do
     i = IMAPSTORE::Imapstore.new
 
-    i.email.should eql( 'jmca2009@gmail.com')
-    i.password.should eql('masson98')
+    i.email.should eql( 'account@gmail.com')
+    i.password.should eql('password')
     i.store_tag.should eql('IMAPSTORE')
 		i.imap_server.should eql('imap.gmail.com')
 		i.imap_port.should eql(993)
