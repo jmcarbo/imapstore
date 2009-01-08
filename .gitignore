@@ -4,3 +4,4 @@
 ext/Makefile
 ext/mysql.c
 .DS_Store
+pkg
