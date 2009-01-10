@@ -13,18 +13,18 @@ module IMAPSTORE
 		
 		CONFIG_TEMPLATE = <<-END
 default:
-	email: account@gmail.com
-	password: password
-	store_tag: IMAPSTORE
-	imap_server: imap.gmail.com
-	imap_port: 993
-	
+  email: account@gmail.com  
+  password: password
+  store_tag: IMAPSTORE
+  imap_server: imap.gmail.com
+  imap_port: 993
+
 other:
-	email: other_account@gmail.com
-	password: password
-	store_tag: IMAPSTORE
-	imap_server: imap.gmail.com
-	imap_port: 993
+  email: other_account@gmail.com
+  password: password
+  store_tag: IMAPSTORE
+  imap_server: imap.gmail.com
+  imap_port: 993
 END
 
     def self.create_config_file(file = File.expand_path('~/.imapstore/config.yml'))
