@@ -12,11 +12,19 @@ module IMAPSTORE
 		CHUNK_SIZE=10000000
 		
 		CONFIG_TEMPLATE = <<-END
-email: account@gmail.com
-password: password
-store_tag: IMAPSTORE
-imap_server: imap.gmail.com
-imap_port: 993
+default:
+	email: account@gmail.com
+	password: password
+	store_tag: IMAPSTORE
+	imap_server: imap.gmail.com
+	imap_port: 993
+	
+other:
+	email: other_account@gmail.com
+	password: password
+	store_tag: IMAPSTORE
+	imap_server: imap.gmail.com
+	imap_port: 993
 END
 
     def self.create_config_file(file = File.expand_path('~/.imapstore/config.yml'))
@@ -27,9 +35,11 @@ END
 			end      
     end
     
-	  def initialize
+	  def initialize(file = File.expand_path('~/.imapstore/config.yml'), imapstore="default")
 			@versioned = true
-	    get_config
+			@verbose = false
+			
+	    get_config(file, imapstore)
 	    connect
 	  end
 	
@@ -61,6 +71,14 @@ END
 			@imap_port
 		end
 		
+		def verbose
+			@verbose
+		end
+		
+		def verbose=value
+			@verbose = value
+		end
+		
 	  def connect()
 	    if !@imap && @email && @password && @imap_server && @imap_port
 	      @imap = Net::IMAP.new(@imap_server, @imap_port, true)
@@ -78,18 +96,19 @@ END
 	    end
 	  end
 
-	  def get_config(file = File.expand_path('~/.imapstore/config.yml'))
+	  def get_config(file = File.expand_path('~/.imapstore/config.yml'), imapstore = "default")
 			if !File.exists?(file)
 				File.open(file,"w").write(CONFIG_TEMPLATE)
 			end
+
 	    aConfig = YAML::load_file(file)
 
 	    #COFIGURATION SECTION
-	    @email = aConfig['email']
-	    @password = aConfig['password']
-	    @store_tag = aConfig['store_tag'] || "IMAPSTORE"
-			@imap_server = aConfig['imap_server']
-			@imap_port = aConfig['imap_port']
+	    @email = aConfig[imapstore]['email']
+	    @password = aConfig[imapstore]['password']
+	    @store_tag = aConfig[imapstore]['store_tag'] || "IMAPSTORE"
+			@imap_server = aConfig[imapstore]['imap_server']
+			@imap_port = aConfig[imapstore]['imap_port']
 	    #END CONFIGURATION SECTION
 	  end
 
@@ -184,27 +203,41 @@ END
 		def transverse(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false, folder_only=false)
 		  file_list=[]
 
-			@imap.list(target_folder, "*").each do |folder|
-				if ((recursive == true) && (folder.name.match(/^#{target_folder}(\/.+)*$/))) || (folder.name == target_folder) 
-					file_list << folder.name
-					yield(folder.name, nil, nil, nil, nil) if block_given?
+
+			
+			
+			begin
+				target_folder = "" if target_folder == "/"
+				
+				puts "..... fetching #{target_folder} " if @verbose	
 					
-					if((!folder.attr.include? :Noselect) && (folder_only==false))
+				@imap.list(target_folder, "*").each do |folder|
 
-				    @imap.select(folder.name)
+					puts "..... transversing #{folder.name} " if @verbose
+								
+					if ((recursive == true) && (target_folder == "" ? true : folder.name.match(/^#{target_folder}(\/.+)*$/))) || (folder.name == target_folder) 
+						puts "..... got hit transversing #{folder.name} " if @verbose
+						file_list << folder.name
+						yield(folder.name, nil, nil, nil, nil) if block_given?
+					
+						if((!folder.attr.include? :Noselect) && (folder_only==false))
 
-				    @imap.search(["NOT", "DELETED"]).each do |message_id|
-				      a = @imap.fetch(message_id, "RFC822")
-				      mail = TMail::Mail.parse(a[0].attr["RFC822"])
-				      file_name = mail.subject.match(/^[^\[]+\[([^\]]+)\]/)[1]
-				      file_list << folder.name + "/" + file_name if file_name.match(glob)
-							yield(folder.name, file_name, message_id, mail, file_name) if block_given? && file_name.match(glob)
+					    @imap.select(folder.name)
+
+					    @imap.search(["NOT", "DELETED"]).each do |message_id|
+					      a = @imap.fetch(message_id, "RFC822")
+					      mail = TMail::Mail.parse(a[0].attr["RFC822"])
+					      file_name = mail.subject.match(/^[^\[]+\[([^\]]+)\]/)[1]
+					      file_list << folder.name + "/" + file_name if file_name.match(glob)
+								yield(folder.name, file_name, message_id, mail, file_name) if block_given? && file_name.match(glob)
+							end
 						end
 					end
 				end
+			rescue
 			end
-
-	    file_list.sort			
+			
+	    file_list.sort
 		end
 
 	  def ls(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
@@ -232,13 +265,14 @@ END
 
 
 
-	  def rm_file(folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
-			file_list = transverse(target_folder, glob, recursive, dot_files, false) do |folder, file, message_id, mail, file_name|
-	      @imap.store(message_id, "+FLAGS", [:Deleted]) if file && message_id
+	  def rm_file(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
+			file_list = transverse(target_folder, glob, false, dot_files, false) do |folder, file, message_id, mail, file_name|
+				if file && message_id
+	      	@imap.store(message_id, "+FLAGS", [:Deleted]) 
+					@imap.expunge
+				end
 			end
-			
-	    @imap.expunge
-
+						
 	    file_list
 	  end
 
@@ -246,11 +280,28 @@ END
 			@imap.create(folder)
 		end
 		
-		def rmdir(folder, recursive = false, dot_files = false)
-			transverse(target_folder, glob, false, dot_files, true) do |folder, file, message_id, mail, file_name|
-				rm_file(folder)
+		def rmdir(target_folder, recursive = false, dot_files = false)
+			folders = []
+			puts "..... Deleting #{target_folder}" if @verbose
+			
+			transverse(target_folder, /.+/, recursive, dot_files, false) do |folder, file, message_id, mail, file_name|	
+				puts "..... assigning dir #{folder} for removal" if @verbose
+				folders << folder if !(folders.include? folder)
+				
+				if file && message_id
+					puts "..... actually removing dir #{folder} file #{file_name}" if @verbose
+	      	@imap.store(message_id, "+FLAGS", [:Deleted]) 
+					@imap.expunge
+				end
+			end
+
+			
+			folders.each do |folder|
+				puts "..... actually removing dir #{folder}" if @verbose
 				@imap.delete(folder)
 			end
+			
+			folders
 		end
 		
 		def quota(folder)

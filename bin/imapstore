@@ -6,15 +6,16 @@ require 'imapstore'
 require 'getoptions'
 
 COMMAND_LIST = ['ls', 'rm', 'put', 'get', 'rmdir', 'mkdir', 'quota', 'setup' ]
-opt = GetOptions.new(%w(help subject=s command=s dir=s files=@s recursive! versioned! all! ))
+opt = GetOptions.new(%w( help subject=s command=s dir=s files=@s recursive! versioned! all! imapstore:s x! ))
 
 if opt['help']
 	puts "Usage: imapstore -c <#{COMMAND_LIST.join(', ')}> -s <subject> -d <folder> -f <file list or glob> "
+	puts "                 -i <imapstore> -x --recursive --versioned --all"
 	puts "       imapstore -h"
 	exit 0
 end
 
-
+imapstore  = opt['imapstore'] || "default"
 command = opt['command'] || "ls"
 dir = opt['dir'] || "INBOX"
 files = opt['files'] || "*"
@@ -22,6 +23,7 @@ subject = opt['subject'] || ""
 recursive = opt['recursive'] || false
 all = opt['all'] || false
 versioned = opt['versioned']
+verbose = opt['x'] || false
 
 
 begin
@@ -30,9 +32,12 @@ if COMMAND_LIST.include? command
 	  IMAPSTORE::Imapstore.create_config_file
     exit
   end
-	i = IMAPSTORE::Imapstore.new
-	i.versioned=versioned if versioned!=nil
 
+	
+	i = IMAPSTORE::Imapstore.new(File.expand_path('~/.imapstore/config.yml'), imapstore)
+	i.versioned=versioned if versioned!=nil
+	i.verbose = verbose
+	
 	case command
 		when 'ls':
 			files.each do |f|
