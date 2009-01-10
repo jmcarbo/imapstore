@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{imapstore}
-  s.version = "0.0.3"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Joan Marc Carbo Arnau"]
-  s.date = %q{2009-01-08}
+  s.date = %q{2009-01-10}
   s.default_executable = %q{imapstore}
   s.description = %q{ruby gem to use an imap server as a file storage device}
   s.email = ["jmcarbo@gmail.com"]
@@ -28,18 +28,18 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<tmail>, [">= 1.2.3"])
       s.add_runtime_dependency(%q<getoptions>, [">= 0.1"])
-      s.add_development_dependency(%q<newgem>, [">= 1.1.0"])
+      s.add_development_dependency(%q<newgem>, [">= 1.2.3"])
       s.add_development_dependency(%q<hoe>, [">= 1.8.0"])
     else
       s.add_dependency(%q<tmail>, [">= 1.2.3"])
       s.add_dependency(%q<getoptions>, [">= 0.1"])
-      s.add_dependency(%q<newgem>, [">= 1.1.0"])
+      s.add_dependency(%q<newgem>, [">= 1.2.3"])
       s.add_dependency(%q<hoe>, [">= 1.8.0"])
     end
   else
     s.add_dependency(%q<tmail>, [">= 1.2.3"])
     s.add_dependency(%q<getoptions>, [">= 0.1"])
-    s.add_dependency(%q<newgem>, [">= 1.1.0"])
+    s.add_dependency(%q<newgem>, [">= 1.2.3"])
     s.add_dependency(%q<hoe>, [">= 1.8.0"])
   end
 end
