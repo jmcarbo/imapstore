@@ -4,6 +4,6 @@ $:.unshift(File.dirname(__FILE__)) unless
 require 'imapstore/imapstore.rb'
 
 module IMAPSTORE
-  VERSION = '0.4.0'
+  VERSION = '0.4.1'
 
 end
