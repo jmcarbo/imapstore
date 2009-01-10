@@ -4,6 +4,8 @@ $LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__) + "/../lib"))
 require 'rubygems'
 require 'imapstore'
 require 'getoptions'
+#old versions of ruby require this
+require 'rdoc/ri/ri_paths'
 
 COMMAND_LIST = ['ls', 'rm', 'put', 'get', 'rmdir', 'mkdir', 'quota', 'setup' ]
 opt = GetOptions.new(%w( help subject=s command=s dir=s files=@s recursive! versioned! all! imapstore:s x! ))

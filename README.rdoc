@@ -32,6 +32,10 @@ store.
 
 == INSTALL:
 
+# First make sure you have the latest version of gem
+
+gem update --system
+
 # add githum gem repository if you haven't done so
 
 gem sources -a http://gems.github.com

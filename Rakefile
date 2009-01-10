@@ -9,6 +9,7 @@ $hoe = Hoe.new('imapstore', IMAPSTORE::VERSION) do |p|
   #p.post_install_message = 'PostInstall.txt' # TODO remove if post-install message not required
   p.rubyforge_name       = p.name # TODO this is default value
   p.extra_deps         = [
+    ['rdoc','>= 2.2.0'],
     ['tmail','>= 1.2.3'],
     ['getoptions','>= 0.1']
   ]
