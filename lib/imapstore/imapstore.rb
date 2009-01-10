@@ -180,60 +180,63 @@ END
 				store_file_chunk( file, folder, subject, content)
 			end
 	  end
+	
+		def transverse(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false, folder_only=false)
+		  file_list=[]
 
-	  def ls(folder = "INBOX", glob = /.+/)
-			if folder == "/"
-				return @imap.list("","*").map { |d| d.name }.sort
+			@imap.list(target_folder, "*").each do |folder|
+				if ((recursive == true) && (folder.name.match(/^#{target_folder}(\/.+)*$/))) || (folder.name == target_folder) 
+					file_list << folder.name
+					yield(folder.name, nil, nil, nil, nil) if block_given?
+					
+					if((!folder.attr.include? :Noselect) && (folder_only==false))
+
+				    @imap.select(folder.name)
+
+				    @imap.search(["NOT", "DELETED"]).each do |message_id|
+				      a = @imap.fetch(message_id, "RFC822")
+				      mail = TMail::Mail.parse(a[0].attr["RFC822"])
+				      file_name = mail.subject.match(/^[^\[]+\[([^\]]+)\]/)[1]
+				      file_list << folder.name + "/" + file_name if file_name.match(glob)
+							yield(folder.name, file_name, message_id, mail, file_name) if block_given? && file_name.match(glob)
+						end
+					end
+				end
+			end
+
+	    file_list.sort			
+		end
+
+	  def ls(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
+			transverse(target_folder, glob, recursive, dot_files, false)
+	  end
+
+	  def get_file(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
+			file_list = transverse(target_folder, glob, recursive, dot_files, false) do |folder, file, message_id, mail, file_name|
+				
+				if mail && mail.multipart? then
+				    mail.parts.each do |m|
+				      if !m.main_type
+								append_dir = folder.sub(/^#{target_folder}\/*/,"")
+								if append_dir != ""
+									Dir.mkdir(append_dir) if !File.exists? append_dir
+
+									file_name = append_dir + "/" + file_name
+								end
+								File.open(file_name,"w").write(m.body)
+							end
+				    end
+				end
+			end
+	  end
+
+
+
+	  def rm_file(folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
+			file_list = transverse(target_folder, glob, recursive, dot_files, false) do |folder, file, message_id, mail, file_name|
+	      @imap.store(message_id, "+FLAGS", [:Deleted]) if file && message_id
 			end
 			
-	    file_list = []
-	    @imap.select(folder)
-	    @imap.search(["NOT", "DELETED"]).each do |message_id|
-	      a = @imap.fetch(message_id, "RFC822")
-	      mail = TMail::Mail.parse(a[0].attr["RFC822"])
-	      file_name = mail.subject.match(/^[^\[]+\[([^\]]+)\]/)[1]
-	      file_list << file_name if file_name.match(glob)
-	    end
-	    file_list
-	  end
-
-	  def get_file(folder = "INBOX", glob = /.+/)			
-	    file_list = []
-	    @imap.select(folder)
-	    @imap.search(["NOT", "DELETED"]).each do |message_id|
-	      a = @imap.fetch(message_id, "RFC822")
-	      mail = TMail::Mail.parse(a[0].attr["RFC822"])
-	      file_name = mail.subject.match(/^[^\[]+\[([^\]]+)\]/)[1]
-				if file_name.match(glob)
-					if mail.multipart? then
-					    mail.parts.each do |m|
-					      if !m.main_type
-									File.open(file_name,"w").write(m.body)
-								end
-					    end
-					end
-					
-	      	file_list << file_name
-				end
-	    end
-	    file_list
-	  end
-
-
-
-	  def rm_file(folder = "INBOX", glob = /.+/)
-	    file_list = []
-
-	    @imap.select(folder)
-	    @imap.search(["NOT", "DELETED"]).each do |message_id|
-	      a = @imap.fetch(message_id, "RFC822")
-	      mail = TMail::Mail.parse(a[0].attr["RFC822"])
-	      file_name = mail.subject.match(/^[^\[]+\[([^\]]+)\]/)[1]
-	      if glob && file_name.match(glob)
-	        @imap.store(message_id, "+FLAGS", [:Deleted]) 
-	        file_list << file_name
-	      end
-	    end
 	    @imap.expunge
 
 	    file_list
@@ -243,9 +246,11 @@ END
 			@imap.create(folder)
 		end
 		
-		def rmdir(folder)
-			rm_file(folder)
-			@imap.delete(folder)
+		def rmdir(folder, recursive = false, dot_files = false)
+			transverse(target_folder, glob, false, dot_files, true) do |folder, file, message_id, mail, file_name|
+				rm_file(folder)
+				@imap.delete(folder)
+			end
 		end
 		
 		def quota(folder)

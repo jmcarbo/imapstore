@@ -6,7 +6,7 @@ require 'imapstore'
 require 'getoptions'
 
 COMMAND_LIST = ['ls', 'rm', 'put', 'get', 'rmdir', 'mkdir', 'quota', 'setup' ]
-opt = GetOptions.new(%w(help subject=s command=s dir=s files=@s recursive! versioned! ))
+opt = GetOptions.new(%w(help subject=s command=s dir=s files=@s recursive! versioned! all! ))
 
 if opt['help']
 	puts "Usage: imapstore -c <#{COMMAND_LIST.join(', ')}> -s <subject> -d <folder> -f <file list or glob> "
@@ -20,7 +20,9 @@ dir = opt['dir'] || "INBOX"
 files = opt['files'] || "*"
 subject = opt['subject'] || ""
 recursive = opt['recursive'] || false
+all = opt['all'] || false
 versioned = opt['versioned']
+
 
 begin
 if COMMAND_LIST.include? command 
@@ -36,16 +38,23 @@ if COMMAND_LIST.include? command
 			files.each do |f|
 				f = /.+/ if f == '*'
 				
-				i.ls(dir, Regexp.new(f)).each do |a|
+				i.ls(dir, Regexp.new(f), recursive, all).each do |a|
 					puts a
 				end	
 			end
 		when 'put':
+			
 			files.each do |f|
-				Dir.glob(f) do |f2|
+				local_dir = File.dirname(f)
+				f = local_dir + "/**/" + File.basename(f) if recursive
+
+				Dir.glob(f, all==true ? File::FNM_DOTMATCH : 0) do |f2|					
 					if(!File.directory? f2)
-						puts "Storing file #{f2}"
-						i.store_file(f2,dir,subject)
+						remote_dir = dir
+						append_dir = File.dirname(f2).sub(/^#{local_dir}\/*/,"")
+						remote_dir = remote_dir + "/" + append_dir if append_dir != ""
+						puts "Storing file #{f2} in remote dir \"#{remote_dir}\""
+						i.store_file(f2,remote_dir,subject)
 					end
 				end
 			end
@@ -53,7 +62,7 @@ if COMMAND_LIST.include? command
 			files.each do |f|
 				f = /.+/ if f == '*'
 				puts "Getting files"
-				i.get_file(dir, Regexp.new(f)).each do |a|
+				i.get_file(dir, Regexp.new(f), recursive, all).each do |a|
 					puts a
 				end	
 			end
@@ -61,14 +70,14 @@ if COMMAND_LIST.include? command
 			files.each do |f|
 				f = /.+/ if f == '*'
 				puts "Deleting files"
-				i.rm_file(dir, Regexp.new(f)).each do |a|
+				i.rm_file(dir, Regexp.new(f), recursive, all).each do |a|
 					puts a
 				end	
 			end			
 		when 'mkdir':
 			i.mkdir(dir)
 		when 'rmdir':
-			i.rmdir(dir)
+			i.rmdir(dir, recursive, all)
 		when 'quota':
 			q = i.quota("INBOX")
 			puts "Used  #{q[1]['usage'].to_s} of #{q[1]['quota'].to_s}"
