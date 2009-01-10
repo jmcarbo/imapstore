@@ -6,6 +6,24 @@
 
 ruby gem to use an imap server as a file storage device
 
+== USAGE
+
+* recursive storign files
+
+imapstore -c put -r -d <folder> -f <files>
+
+* snipplets
+
+imapstore -c snipplet -s <subject> -d <folder> -t <text>
+
+* verbose output 
+
+-x
+
+* select imap account
+
+-i <account in config.yml>
+
 == FEATURES/PROBLEMS:
 
 * many

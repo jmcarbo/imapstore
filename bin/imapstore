@@ -7,8 +7,8 @@ require 'getoptions'
 #old versions of ruby require this
 require 'rdoc/ri/ri_paths'
 
-COMMAND_LIST = ['ls', 'rm', 'put', 'get', 'rmdir', 'mkdir', 'quota', 'setup' ]
-opt = GetOptions.new(%w( help subject=s command=s dir=s files=@s recursive! versioned! all! imapstore:s x! ))
+COMMAND_LIST = ['ls', 'rm', 'put', 'get', 'rmdir', 'mkdir', 'quota', 'setup', 'snipplet' ]
+opt = GetOptions.new(%w( help subject=s command=s dir=s files=@s recursive! versioned! all! imapstore:s x! text=s))
 
 if opt['help']
 	puts "Usage: imapstore -c <#{COMMAND_LIST.join(', ')}> -s <subject> -d <folder> -f <file list or glob> "
@@ -26,7 +26,7 @@ recursive = opt['recursive'] || false
 all = opt['all'] || false
 versioned = opt['versioned']
 verbose = opt['x'] || false
-
+text = opt['text'] || "no text"
 
 begin
 if COMMAND_LIST.include? command 
@@ -88,6 +88,9 @@ if COMMAND_LIST.include? command
 		when 'quota':
 			q = i.quota("INBOX")
 			puts "Used  #{q[1]['usage'].to_s} of #{q[1]['quota'].to_s}"
+		when 'snipplet':
+			
+			i.snipplet(subject,text,dir, nil)
 		else
 			puts "unimplemented command #{command}"	
 	end

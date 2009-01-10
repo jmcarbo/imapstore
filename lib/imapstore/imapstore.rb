@@ -111,6 +111,35 @@ END
 			@imap_port = aConfig[imapstore]['imap_port']
 	    #END CONFIGURATION SECTION
 	  end
+	
+		def snipplet(subject = "snipplet", body = "", folder="snipplets", file = nil)
+			puts "Storing snipplet" if @verbose
+			
+			mail = TMail::Mail.new
+	  	mail.to = @email
+	  	mail.from = @email
+  		mail.subject = subject
+
+	  	mail.date = Time.now
+	  	mail.mime_version = '1.0'
+			
+	  	mailpart1=TMail::Mail.new
+	  	mailpart1.set_content_type 'text', 'plain'
+	  	mailpart1.body = body
+	  	mail.parts << mailpart1
+	  	mail.set_content_type 'multipart', 'mixed'
+
+			# 	  	if file && FileTest.exists?(file)
+			# 	  		mailpart=TMail::Mail.new
+			# 	  		mailpart.body = Base64.encode64(chunk.to_s)
+			# 	  		mailpart.transfer_encoding="Base64"
+			#   			mailpart['Content-Disposition'] = "attachment; filename=#{CGI::escape(basename)}"
+			# 	mail.parts.push(mailpart)
+			# end
+			@imap.create(folder) if !@imap.list("", folder)
+			@imap.append(folder, mail.to_s, [:Seen], Time.now)
+			
+		end
 
 		def store_file_chunk( file, folder = "INBOX", subject = "", chunk=nil, chunk_no=0, max_chunk_no=0 )
 			if(max_chunk_no>0)
