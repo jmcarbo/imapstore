@@ -28,18 +28,25 @@ versioned = opt['versioned']
 verbose = opt['x'] || false
 text = opt['text'] || "no text"
 
+
+
+
 begin
+
 if COMMAND_LIST.include? command 
   if command == 'setup'
 	  IMAPSTORE::Imapstore.create_config_file
     exit
   end
 
-	
+	puts "Opening mailstore #{imapstore} configured in #{File.expand_path('~/.imapstore/config.yml')}" if verbose
 	i = IMAPSTORE::Imapstore.new(File.expand_path('~/.imapstore/config.yml'), imapstore)
+	puts "Mailstore #{imapstore} opened" if verbose
+	
 	i.versioned=versioned if versioned!=nil
 	i.verbose = verbose
-	
+
+	puts "Executing command #{command}" if verbose
 	case command
 		when 'ls':
 			files.each do |f|
@@ -50,8 +57,9 @@ if COMMAND_LIST.include? command
 				end	
 			end
 		when 'put':
-			
+			puts "Storing files" if verbose
 			files.each do |f|
+				f = File.expand_path(f)
 				local_dir = File.dirname(f)
 				f = local_dir + "/**/" + File.basename(f) if recursive
 
@@ -60,8 +68,12 @@ if COMMAND_LIST.include? command
 						remote_dir = dir
 						append_dir = File.dirname(f2).sub(/^#{local_dir}\/*/,"")
 						remote_dir = remote_dir + "/" + append_dir if append_dir != ""
-						puts "Storing file #{f2} in remote dir \"#{remote_dir}\""
-						i.store_file(f2,remote_dir,subject)
+						if File.exists?(f2)
+							puts "Storing file #{f2} in remote dir \"#{remote_dir}\""
+							i.store_file(f2,remote_dir,subject)
+						else
+							puts "File #{f2} does not exist."
+						end
 					end
 				end
 			end
@@ -92,13 +104,16 @@ if COMMAND_LIST.include? command
 			
 			i.snipplet(subject,text,dir, nil)
 		else
-			puts "unimplemented command #{command}"	
+			raise "unimplemented command #{command}"	
 	end
 			
 
 
 	i.disconnect
+else
+	puts "command #{command} is unimplemented"
 end
+
 rescue
 	puts "An error has occured #{$!}"
 end

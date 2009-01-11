@@ -8,7 +8,7 @@ ruby gem to use an imap server as a file storage device
 
 == USAGE
 
-* recursive storign files
+* recursive storing files
 
 imapstore -c put -r -d <folder> -f <files>
 

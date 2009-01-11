@@ -38,11 +38,13 @@ END
     end
     
 	  def initialize(file = File.expand_path('~/.imapstore/config.yml'), imapstore="default")
+			puts "Initializing IMAP" if @verbose
 			@versioned = true
 			@verbose = false
-			
-	    get_config(file, imapstore)
-	    connect
+			 
+			puts "Getting configuration file #{file} for account #{imapstore}" if @verbose
+			get_config(file, imapstore)
+			connect
 	  end
 	
 		def versioned
@@ -77,13 +79,13 @@ END
 			@verbose
 		end
 		
-		def verbose=value
+		def verbose=(value)
 			@verbose = value
 		end
 		
 	  def connect()
 	    if !@imap && @email && @password && @imap_server && @imap_port
-				if(@ssl == 'true')
+				if(@ssl == true)
 	      	@imap = Net::IMAP.new(@imap_server, @imap_port, true)
 				else
 	      	@imap = Net::IMAP.new(@imap_server, @imap_port, false)
@@ -117,25 +119,27 @@ END
 			@imap_port = aConfig[imapstore]['imap_port']
 			@ssl = aConfig[imapstore]['ssl'] || false
 	    #END CONFIGURATION SECTION
+	
+			aConfig
 	  end
 	
 		def snipplet(subject = "snipplet", body = "", folder="snipplets", file = nil)
 			puts "Storing snipplet" if @verbose
 			
 			mail = TMail::Mail.new
-	  	mail.to = @email
-	  	mail.from = @email
-  		mail.subject = subject
-
-	  	mail.date = Time.now
-	  	mail.mime_version = '1.0'
+			  	mail.to = @email
+			  	mail.from = @email
+		  		mail.subject = subject
+		
+			  	mail.date = Time.now
+			  	mail.mime_version = '1.0'
 			
-	  	mailpart1=TMail::Mail.new
-	  	mailpart1.set_content_type 'text', 'plain'
-	  	mailpart1.body = body
-	  	mail.parts << mailpart1
-	  	mail.set_content_type 'multipart', 'mixed'
-
+			  	mailpart1=TMail::Mail.new
+			  	mailpart1.set_content_type 'text', 'plain'
+			  	mailpart1.body = body
+			  	mail.parts << mailpart1
+			  	mail.set_content_type 'multipart', 'mixed'
+		
 			# 	  	if file && FileTest.exists?(file)
 			# 	  		mailpart=TMail::Mail.new
 			# 	  		mailpart.body = Base64.encode64(chunk.to_s)
@@ -147,14 +151,14 @@ END
 			@imap.append(folder, mail.to_s, [:Seen], Time.now)
 			
 		end
-
+		
 		def store_file_chunk( file, folder = "INBOX", subject = "", chunk=nil, chunk_no=0, max_chunk_no=0 )
 			if(max_chunk_no>0)
 				puts "Storing part #{chunk_no} of #{max_chunk_no}"
 			end
-	    basename = File.basename(file)
+			    basename = File.basename(file)
 			version = 0
-
+		
 			if max_chunk_no == 0
 				tag = "#{@store_tag}[#{basename}]"
 			else
@@ -171,12 +175,12 @@ END
 			@imap.expunge
 			
 			mail = TMail::Mail.new
-	  	mail.to = @email
-	  	mail.from = @email
+			  	mail.to = @email
+			  	mail.from = @email
 			if max_chunk_no == 0
-	  		mail.subject = "#{@store_tag}[#{basename}]"
+			  		mail.subject = "#{@store_tag}[#{basename}]"
 			else
-	  		mail.subject = "#{@store_tag}[#{basename}](#{chunk_no}-#{max_chunk_no})"
+			  		mail.subject = "#{@store_tag}[#{basename}](#{chunk_no}-#{max_chunk_no})"
 			end
 			
 			if version > 0
@@ -187,36 +191,36 @@ END
 				mail.subject = mail.subject + ": #{subject}"
 			end
 			
-	  	mail.date = Time.now
-	  	mail.mime_version = '1.0'
-
-	  	mailpart1=TMail::Mail.new
-	  	mailpart1.set_content_type 'text', 'plain'
-	  	mailpart1.body = "This is a mail storage message of file #{file}"	
-	  	mail.parts << mailpart1
-	  	mail.set_content_type 'multipart', 'mixed'
-
-	  	if FileTest.exists?(file)
-	  		mailpart=TMail::Mail.new
-	  		mailpart.body = Base64.encode64(chunk.to_s)
-	  		mailpart.transfer_encoding="Base64"
+			  	mail.date = Time.now
+			  	mail.mime_version = '1.0'
+		
+			  	mailpart1=TMail::Mail.new
+			  	mailpart1.set_content_type 'text', 'plain'
+			  	mailpart1.body = "This is a mail storage message of file #{file}"	
+			  	mail.parts << mailpart1
+			  	mail.set_content_type 'multipart', 'mixed'
+		
+			  	if FileTest.exists?(file)
+			  		mailpart=TMail::Mail.new
+			  		mailpart.body = Base64.encode64(chunk.to_s)
+			  		mailpart.transfer_encoding="Base64"
 				if max_chunk_no == 0
-	  			mailpart['Content-Disposition'] = "attachment; filename=#{CGI::escape(basename)}"
+			  			mailpart['Content-Disposition'] = "attachment; filename=#{CGI::escape(basename)}"
 				else
-	  			mailpart['Content-Disposition'] = "attachment; filename=#{CGI::escape(basename)}_#{chunk_no}-#{max_chunk_no}"
+			  			mailpart['Content-Disposition'] = "attachment; filename=#{CGI::escape(basename)}_#{chunk_no}-#{max_chunk_no}"
 				end
-	  		mail.parts.push(mailpart)
-	  	end
-
-
-	  	@imap.append(folder, mail.to_s, [:Seen], File.new(file).atime)
-
+			  		mail.parts.push(mailpart)
+			  	end
+		
+		
+			  	@imap.append(folder, mail.to_s, [:Seen], File.new(file).atime)
+		
 		end
 		
-	  def store_file( file, folder = "INBOX", subject = "")
-
-	  	@imap.create(folder) if !@imap.list("", folder)
-
+			  def store_file( file, folder = "INBOX", subject = "")
+		
+			  	@imap.create(folder) if !@imap.list("", folder)
+		
 			size = File.size(file) 
 			if(size > MAX_FILE_SIZE)
 				remaining = size
@@ -234,12 +238,12 @@ END
 				content=File.open(file).read
 				store_file_chunk( file, folder, subject, content)
 			end
-	  end
-	
+			  end
+			
 		def transverse(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false, folder_only=false)
 		  file_list=[]
-
-
+		
+		
 			
 			
 			begin
@@ -248,7 +252,7 @@ END
 				puts "..... fetching #{target_folder} " if @verbose	
 					
 				@imap.list(target_folder, "*").each do |folder|
-
+		
 					puts "..... transversing #{folder.name} " if @verbose
 								
 					if ((recursive == true) && (target_folder == "" ? true : folder.name.match(/^#{target_folder}(\/.+)*$/))) || (folder.name == target_folder) 
@@ -257,9 +261,9 @@ END
 						yield(folder.name, nil, nil, nil, nil) if block_given?
 					
 						if((!folder.attr.include? :Noselect) && (folder_only==false))
-
+		
 					    @imap.select(folder.name)
-
+		
 					    @imap.search(["NOT", "DELETED"]).each do |message_id|
 					      a = @imap.fetch(message_id, "RFC822")
 					      mail = TMail::Mail.parse(a[0].attr["RFC822"])
@@ -273,14 +277,14 @@ END
 			rescue
 			end
 			
-	    file_list.sort
+			    file_list.sort
 		end
-
-	  def ls(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
+		
+			  def ls(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
 			transverse(target_folder, glob, recursive, dot_files, false)
-	  end
-
-	  def get_file(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
+			  end
+		
+			  def get_file(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
 			file_list = transverse(target_folder, glob, recursive, dot_files, false) do |folder, file, message_id, mail, file_name|
 				
 				if mail && mail.multipart? then
@@ -289,7 +293,7 @@ END
 								append_dir = folder.sub(/^#{target_folder}\/*/,"")
 								if append_dir != ""
 									Dir.mkdir(append_dir) if !File.exists? append_dir
-
+		
 									file_name = append_dir + "/" + file_name
 								end
 								File.open(file_name,"w").write(m.body)
@@ -297,21 +301,21 @@ END
 				    end
 				end
 			end
-	  end
-
-
-
-	  def rm_file(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
+			  end
+		
+		
+		
+			  def rm_file(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
 			file_list = transverse(target_folder, glob, false, dot_files, false) do |folder, file, message_id, mail, file_name|
 				if file && message_id
-	      	@imap.store(message_id, "+FLAGS", [:Deleted]) 
+			      	@imap.store(message_id, "+FLAGS", [:Deleted]) 
 					@imap.expunge
 				end
 			end
 						
-	    file_list
-	  end
-
+			    file_list
+			  end
+		
 		def mkdir(folder)
 			@imap.create(folder)
 		end
@@ -326,11 +330,11 @@ END
 				
 				if file && message_id
 					puts "..... actually removing dir #{folder} file #{file_name}" if @verbose
-	      	@imap.store(message_id, "+FLAGS", [:Deleted]) 
+			      	@imap.store(message_id, "+FLAGS", [:Deleted]) 
 					@imap.expunge
 				end
 			end
-
+		
 			
 			folders.each do |folder|
 				puts "..... actually removing dir #{folder}" if @verbose
