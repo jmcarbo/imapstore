@@ -18,13 +18,15 @@ default:
   store_tag: IMAPSTORE
   imap_server: imap.gmail.com
   imap_port: 993
-
+	ssl: true
+	
 other:
   email: other_account@gmail.com
   password: password
   store_tag: IMAPSTORE
   imap_server: imap.gmail.com
   imap_port: 993
+  ssl: true
 END
 
     def self.create_config_file(file = File.expand_path('~/.imapstore/config.yml'))
@@ -81,7 +83,11 @@ END
 		
 	  def connect()
 	    if !@imap && @email && @password && @imap_server && @imap_port
-	      @imap = Net::IMAP.new(@imap_server, @imap_port, true)
+				if(@ssl == 'true')
+	      	@imap = Net::IMAP.new(@imap_server, @imap_port, true)
+				else
+	      	@imap = Net::IMAP.new(@imap_server, @imap_port, false)
+				end
 	      @imap.login(@email, @password)
 	    end
 	  end
@@ -109,6 +115,7 @@ END
 	    @store_tag = aConfig[imapstore]['store_tag'] || "IMAPSTORE"
 			@imap_server = aConfig[imapstore]['imap_server']
 			@imap_port = aConfig[imapstore]['imap_port']
+			@ssl = aConfig[imapstore]['ssl'] || false
 	    #END CONFIGURATION SECTION
 	  end
 	
