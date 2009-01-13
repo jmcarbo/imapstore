@@ -12,7 +12,7 @@ opt = GetOptions.new(%w( help subject=s command=s dir=s files=@s recursive! vers
 
 if opt['help']
 	puts "Usage: imapstore -c <#{COMMAND_LIST.join(', ')}> -s <subject> -d <folder> -f <file list or glob> "
-	puts "                 -i <imapstore> -x --recursive --versioned --all"
+	puts "                 -i <imapstore> -x --recursive --versioned --all -t <text of message>"
 	puts "       imapstore -h"
 	exit 0
 end
