@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>store_file_chunk (IMAPSTORE::Imapstore)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/imapstore/imapstore.rb, line 156</span>
+                <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">store_file_chunk</span>( <span class="ruby-identifier">file</span>, <span class="ruby-identifier">folder</span> = <span class="ruby-value str">&quot;INBOX&quot;</span>, <span class="ruby-identifier">subject</span> = <span class="ruby-value str">&quot;&quot;</span>, <span class="ruby-identifier">chunk</span>=<span class="ruby-keyword kw">nil</span>, <span class="ruby-identifier">chunk_no</span>=<span class="ruby-value">0</span>, <span class="ruby-identifier">max_chunk_no</span>=<span class="ruby-value">0</span> )
+                        <span class="ruby-keyword kw">if</span>(<span class="ruby-identifier">max_chunk_no</span><span class="ruby-operator">&gt;</span><span class="ruby-value">0</span>)
+                                <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Storing part #{chunk_no} of #{max_chunk_no}&quot;</span>
+                        <span class="ruby-keyword kw">end</span>
+                            <span class="ruby-identifier">basename</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">basename</span>(<span class="ruby-identifier">file</span>)
+                        <span class="ruby-identifier">version</span> = <span class="ruby-value">0</span>
+                
+                        <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">max_chunk_no</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>
+                                <span class="ruby-identifier">tag</span> = <span class="ruby-node">&quot;#{@store_tag}[#{basename}]&quot;</span>
+                        <span class="ruby-keyword kw">else</span>
+                                <span class="ruby-identifier">tag</span> = <span class="ruby-node">&quot;#{@store_tag}[#{basename}](#{chunk_no}-#{max_chunk_no})&quot;</span>
+                        <span class="ruby-keyword kw">end</span>
+                        <span class="ruby-ivar">@imap</span>.<span class="ruby-identifier">select</span>(<span class="ruby-identifier">folder</span>)
+                        <span class="ruby-ivar">@imap</span>.<span class="ruby-identifier">search</span>([<span class="ruby-value str">&quot;SUBJECT&quot;</span>, <span class="ruby-identifier">tag</span>, <span class="ruby-value str">&quot;NOT&quot;</span>, <span class="ruby-value str">&quot;DELETED&quot;</span>]).<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">message_id</span><span class="ruby-operator">|</span>
+                                <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@versioned</span><span class="ruby-operator">==</span><span class="ruby-keyword kw">true</span>
+                                        <span class="ruby-identifier">version</span> = <span class="ruby-identifier">version</span> <span class="ruby-operator">+</span> <span class="ruby-value">1</span>
+                                <span class="ruby-keyword kw">else</span>
+                                        <span class="ruby-ivar">@imap</span>.<span class="ruby-identifier">store</span>(<span class="ruby-identifier">message_id</span>, <span class="ruby-value str">&quot;+FLAGS&quot;</span>, [<span class="ruby-identifier">:Deleted</span>]) 
+                                <span class="ruby-keyword kw">end</span>
+                        <span class="ruby-keyword kw">end</span>
+                        <span class="ruby-ivar">@imap</span>.<span class="ruby-identifier">expunge</span>
+                        
+                        <span class="ruby-identifier">mail</span> = <span class="ruby-constant">TMail</span><span class="ruby-operator">::</span><span class="ruby-constant">Mail</span>.<span class="ruby-identifier">new</span>
+                             <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">to</span> = <span class="ruby-ivar">@email</span>
+                             <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">from</span> = <span class="ruby-ivar">@email</span>
+                        <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">max_chunk_no</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>
+                                     <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">subject</span> = <span class="ruby-node">&quot;#{@store_tag}[#{basename}]&quot;</span>
+                        <span class="ruby-keyword kw">else</span>
+                                     <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">subject</span> = <span class="ruby-node">&quot;#{@store_tag}[#{basename}](#{chunk_no}-#{max_chunk_no})&quot;</span>
+                        <span class="ruby-keyword kw">end</span>
+                        
+                        <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">version</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+                                <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">subject</span> = <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">subject</span> <span class="ruby-operator">+</span> <span class="ruby-node">&quot;(v. #{version})&quot;</span>
+                        <span class="ruby-keyword kw">end</span>
+                        
+                        <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">subject</span>
+                                <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">subject</span> = <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">subject</span> <span class="ruby-operator">+</span> <span class="ruby-node">&quot;: #{subject}&quot;</span>
+                        <span class="ruby-keyword kw">end</span>
+                        
+                             <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">date</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+                             <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">mime_version</span> = <span class="ruby-value str">'1.0'</span>
+                
+                             <span class="ruby-identifier">mailpart1</span>=<span class="ruby-constant">TMail</span><span class="ruby-operator">::</span><span class="ruby-constant">Mail</span>.<span class="ruby-identifier">new</span>
+                             <span class="ruby-identifier">mailpart1</span>.<span class="ruby-identifier">set_content_type</span> <span class="ruby-value str">'text'</span>, <span class="ruby-value str">'plain'</span>
+                             <span class="ruby-identifier">mailpart1</span>.<span class="ruby-identifier">body</span> = <span class="ruby-node">&quot;This is a mail storage message of file #{file}&quot;</span> 
+                             <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">parts</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">mailpart1</span>
+                             <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">set_content_type</span> <span class="ruby-value str">'multipart'</span>, <span class="ruby-value str">'mixed'</span>
+                
+                             <span class="ruby-keyword kw">if</span> <span class="ruby-constant">FileTest</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-identifier">file</span>)
+                                     <span class="ruby-identifier">mailpart</span>=<span class="ruby-constant">TMail</span><span class="ruby-operator">::</span><span class="ruby-constant">Mail</span>.<span class="ruby-identifier">new</span>
+                                     <span class="ruby-identifier">mailpart</span>.<span class="ruby-identifier">body</span> = <span class="ruby-constant">Base64</span>.<span class="ruby-identifier">encode64</span>(<span class="ruby-identifier">chunk</span>.<span class="ruby-identifier">to_s</span>)
+                                     <span class="ruby-identifier">mailpart</span>.<span class="ruby-identifier">transfer_encoding</span>=<span class="ruby-value str">&quot;Base64&quot;</span>
+                                <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">max_chunk_no</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>
+                                             <span class="ruby-identifier">mailpart</span>[<span class="ruby-value str">'Content-Disposition'</span>] = <span class="ruby-node">&quot;attachment; filename=#{CGI::escape(basename)}&quot;</span>
+                                <span class="ruby-keyword kw">else</span>
+                                             <span class="ruby-identifier">mailpart</span>[<span class="ruby-value str">'Content-Disposition'</span>] = <span class="ruby-node">&quot;attachment; filename=#{CGI::escape(basename)}_#{chunk_no}-#{max_chunk_no}&quot;</span>
+                                <span class="ruby-keyword kw">end</span>
+                                     <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">parts</span>.<span class="ruby-identifier">push</span>(<span class="ruby-identifier">mailpart</span>)
+                             <span class="ruby-keyword kw">end</span>
+                
+                
+                             <span class="ruby-ivar">@imap</span>.<span class="ruby-identifier">append</span>(<span class="ruby-identifier">folder</span>, <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">to_s</span>, [<span class="ruby-identifier">:Seen</span>], <span class="ruby-constant">File</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">file</span>).<span class="ruby-identifier">atime</span>)
+                
+                <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

@@ -37,11 +37,13 @@ END
 			end      
     end
     
-	  def initialize(file = File.expand_path('~/.imapstore/config.yml'), imapstore="default")
+	  def initialize(file = File.expand_path('~/.imapstore/config.yml'), imapstore="default", password=nil)
 			puts "Initializing IMAP" if @verbose
 			@versioned = true
 			@verbose = false
-			 
+			
+			@password = password
+			
 			puts "Getting configuration file #{file} for account #{imapstore}" if @verbose
 			get_config(file, imapstore)
 			connect
@@ -113,7 +115,7 @@ END
 
 	    #COFIGURATION SECTION
 	    @email = aConfig[imapstore]['email']
-	    @password = aConfig[imapstore]['password']
+	    @password = aConfig[imapstore]['password'] if aConfig[imapstore]['password']
 	    @store_tag = aConfig[imapstore]['store_tag'] || "IMAPSTORE"
 			@imap_server = aConfig[imapstore]['imap_server']
 			@imap_port = aConfig[imapstore]['imap_port']

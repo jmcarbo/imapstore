@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>snipplet (IMAPSTORE::Imapstore)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/imapstore/imapstore.rb, line 127</span>
+                <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">snipplet</span>(<span class="ruby-identifier">subject</span> = <span class="ruby-value str">&quot;snipplet&quot;</span>, <span class="ruby-identifier">body</span> = <span class="ruby-value str">&quot;&quot;</span>, <span class="ruby-identifier">folder</span>=<span class="ruby-value str">&quot;snipplets&quot;</span>, <span class="ruby-identifier">file</span> = <span class="ruby-keyword kw">nil</span>)
+                        <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;Storing snipplet&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+                        
+                        <span class="ruby-identifier">mail</span> = <span class="ruby-constant">TMail</span><span class="ruby-operator">::</span><span class="ruby-constant">Mail</span>.<span class="ruby-identifier">new</span>
+                             <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">to</span> = <span class="ruby-ivar">@email</span>
+                             <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">from</span> = <span class="ruby-ivar">@email</span>
+                              <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">subject</span> = <span class="ruby-identifier">subject</span>
+                
+                             <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">date</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+                             <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">mime_version</span> = <span class="ruby-value str">'1.0'</span>
+                        
+                             <span class="ruby-identifier">mailpart1</span>=<span class="ruby-constant">TMail</span><span class="ruby-operator">::</span><span class="ruby-constant">Mail</span>.<span class="ruby-identifier">new</span>
+                             <span class="ruby-identifier">mailpart1</span>.<span class="ruby-identifier">set_content_type</span> <span class="ruby-value str">'text'</span>, <span class="ruby-value str">'plain'</span>
+                             <span class="ruby-identifier">mailpart1</span>.<span class="ruby-identifier">body</span> = <span class="ruby-identifier">body</span>
+                             <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">parts</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">mailpart1</span>
+                             <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">set_content_type</span> <span class="ruby-value str">'multipart'</span>, <span class="ruby-value str">'mixed'</span>
+                
+                        <span class="ruby-comment cmt">#              if file &amp;&amp; FileTest.exists?(file)</span>
+                        <span class="ruby-comment cmt">#                      mailpart=TMail::Mail.new</span>
+                        <span class="ruby-comment cmt">#                      mailpart.body = Base64.encode64(chunk.to_s)</span>
+                        <span class="ruby-comment cmt">#                      mailpart.transfer_encoding=&quot;Base64&quot;</span>
+                        <span class="ruby-comment cmt">#                    mailpart['Content-Disposition'] = &quot;attachment; filename=#{CGI::escape(basename)}&quot;</span>
+                        <span class="ruby-comment cmt">#    mail.parts.push(mailpart)</span>
+                        <span class="ruby-comment cmt"># end</span>
+                        <span class="ruby-ivar">@imap</span>.<span class="ruby-identifier">create</span>(<span class="ruby-identifier">folder</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@imap</span>.<span class="ruby-identifier">list</span>(<span class="ruby-value str">&quot;&quot;</span>, <span class="ruby-identifier">folder</span>)
+                        <span class="ruby-ivar">@imap</span>.<span class="ruby-identifier">append</span>(<span class="ruby-identifier">folder</span>, <span class="ruby-identifier">mail</span>.<span class="ruby-identifier">to_s</span>, [<span class="ruby-identifier">:Seen</span>], <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>)
+                        
+                <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

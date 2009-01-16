@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>File: imapstore.gemspec [RDoc Documentation]</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href=".././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }<\/style>" )
+
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+  <div id="fileHeader">
+    <h1>imapstore.gemspec</h1>
+    <table class="header-table">
+    <tr class="top-aligned-row">
+      <td><strong>Path:</strong></td>
+      <td>imapstore.gemspec
+
+      </td>
+    </tr>
+    <tr class="top-aligned-row">
+      <td><strong>Last Update:</strong></td>
+      <td>Sun Jan 11 07:17:14 +0100 2009</td>
+    </tr>
+    </table>
+  </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+# -*- encoding: utf-8 -*-
+</p>
+<p>
+Gem::Specification.new do |s|
+</p>
+<pre>
+  s.name = %q{imapstore}
+  s.version = &quot;0.4.4&quot;
+
+  s.required_rubygems_version = Gem::Requirement.new(&quot;&gt;= 0&quot;) if s.respond_to? :required_rubygems_version=
+  s.authors = [&quot;Joan Marc Carbo Arnau&quot;]
+  s.date = %q{2009-01-11}
+  s.default_executable = %q{imapstore}
+  s.description = %q{ruby gem to use an imap server as a file storage device}
+  s.email = [&quot;jmcarbo@gmail.com&quot;]
+  s.executables = [&quot;imapstore&quot;]
+  s.extra_rdoc_files = [&quot;History.txt&quot;, &quot;Manifest.txt&quot;, &quot;PostInstall.txt&quot;, &quot;README.rdoc&quot;]
+  s.files = [&quot;History.txt&quot;, &quot;Manifest.txt&quot;, &quot;PostInstall.txt&quot;, &quot;README.rdoc&quot;, &quot;Rakefile&quot;, &quot;bin/imapstore&quot;, &quot;lib/imapstore.rb&quot;, &quot;lib/imapstore/imapstore.rb&quot;, &quot;script/console&quot;, &quot;script/destroy&quot;, &quot;script/generate&quot;, &quot;spec/imapstore_spec.rb&quot;, &quot;spec/spec.opts&quot;, &quot;spec/spec_helper.rb&quot;, &quot;tasks/rspec.rake&quot;]
+  s.has_rdoc = true
+  s.homepage = %q{http://wiki.github.com/jmcarbo/imapstore}
+  s.rdoc_options = [&quot;--main&quot;, &quot;README.rdoc&quot;]
+  s.require_paths = [&quot;lib&quot;]
+  s.rubyforge_project = %q{imapstore}
+  s.rubygems_version = %q{1.3.1}
+  s.summary = %q{ruby gem to use an imap server as a file storage device}
+
+  if s.respond_to? :specification_version then
+    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
+    s.specification_version = 2
+
+    if Gem::Version.new(Gem::RubyGemsVersion) &gt;= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q&lt;rdoc&gt;, [&quot;&gt;= 2.2.0&quot;])
+      s.add_runtime_dependency(%q&lt;tmail&gt;, [&quot;&gt;= 1.2.3&quot;])
+      s.add_runtime_dependency(%q&lt;getoptions&gt;, [&quot;&gt;= 0.1&quot;])
+      s.add_development_dependency(%q&lt;newgem&gt;, [&quot;&gt;= 1.2.3&quot;])
+      s.add_development_dependency(%q&lt;hoe&gt;, [&quot;&gt;= 1.8.0&quot;])
+    else
+      s.add_dependency(%q&lt;rdoc&gt;, [&quot;&gt;= 2.2.0&quot;])
+      s.add_dependency(%q&lt;tmail&gt;, [&quot;&gt;= 1.2.3&quot;])
+      s.add_dependency(%q&lt;getoptions&gt;, [&quot;&gt;= 0.1&quot;])
+      s.add_dependency(%q&lt;newgem&gt;, [&quot;&gt;= 1.2.3&quot;])
+      s.add_dependency(%q&lt;hoe&gt;, [&quot;&gt;= 1.8.0&quot;])
+    end
+  else
+    s.add_dependency(%q&lt;rdoc&gt;, [&quot;&gt;= 2.2.0&quot;])
+    s.add_dependency(%q&lt;tmail&gt;, [&quot;&gt;= 1.2.3&quot;])
+    s.add_dependency(%q&lt;getoptions&gt;, [&quot;&gt;= 0.1&quot;])
+    s.add_dependency(%q&lt;newgem&gt;, [&quot;&gt;= 1.2.3&quot;])
+    s.add_dependency(%q&lt;hoe&gt;, [&quot;&gt;= 1.8.0&quot;])
+  end
+</pre>
+<p>
+end
+</p>
+
+    </div>
+
+   </div>
+
+
+  </div>
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+    <!-- if method_list -->
+
+
+
+
+  </div>
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

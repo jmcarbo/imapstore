@@ -8,7 +8,7 @@ require 'getoptions'
 require 'rdoc/ri/ri_paths'
 
 COMMAND_LIST = ['ls', 'rm', 'put', 'get', 'rmdir', 'mkdir', 'quota', 'setup', 'snipplet' ]
-opt = GetOptions.new(%w( help subject=s command=s dir=s files=@s recursive! versioned! all! imapstore:s x! text=s))
+opt = GetOptions.new(%w( help password=s subject=s command=s dir=s files=@s recursive! versioned! all! imapstore:s x! text=s ))
 
 if opt['help']
 	puts "Usage: imapstore -c <#{COMMAND_LIST.join(', ')}> -s <subject> -d <folder> -f <file list or glob> "
@@ -27,7 +27,7 @@ all = opt['all'] || false
 versioned = opt['versioned']
 verbose = opt['x'] || false
 text = opt['text'] || "no text"
-
+password = opt['password']
 
 
 
@@ -40,7 +40,7 @@ if COMMAND_LIST.include? command
   end
 
 	puts "Opening mailstore #{imapstore} configured in #{File.expand_path('~/.imapstore/config.yml')}" if verbose
-	i = IMAPSTORE::Imapstore.new(File.expand_path('~/.imapstore/config.yml'), imapstore)
+	i = IMAPSTORE::Imapstore.new(File.expand_path('~/.imapstore/config.yml'), imapstore, password)
 	puts "Mailstore #{imapstore} opened" if verbose
 	
 	i.versioned=versioned if versioned!=nil

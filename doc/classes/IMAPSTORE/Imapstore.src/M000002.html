@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>new (IMAPSTORE::Imapstore)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" href="../../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File lib/imapstore/imapstore.rb, line 41</span>
+          <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">file</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">expand_path</span>(<span class="ruby-value str">'~/.imapstore/config.yml'</span>), <span class="ruby-identifier">imapstore</span>=<span class="ruby-value str">&quot;default&quot;</span>)
+                        <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;Initializing IMAP&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+                        <span class="ruby-ivar">@versioned</span> = <span class="ruby-keyword kw">true</span>
+                        <span class="ruby-ivar">@verbose</span> = <span class="ruby-keyword kw">false</span>
+                         
+                        <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Getting configuration file #{file} for account #{imapstore}&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+                        <span class="ruby-identifier">get_config</span>(<span class="ruby-identifier">file</span>, <span class="ruby-identifier">imapstore</span>)
+                        <span class="ruby-identifier">connect</span>
+          <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>
