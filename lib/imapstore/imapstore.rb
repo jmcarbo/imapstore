@@ -244,11 +244,7 @@ END
 			
 		def transverse(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false, folder_only=false)
 		  file_list=[]
-		
-		
-			
-			
-			begin
+			#begin
 				target_folder = "" if target_folder == "/"
 				
 				puts "..... fetching #{target_folder} " if @verbose	
@@ -260,7 +256,9 @@ END
 					if ((recursive == true) && (target_folder == "" ? true : folder.name.match(/^#{target_folder}(\/.+)*$/))) || (folder.name == target_folder) 
 						puts "..... got hit transversing #{folder.name} " if @verbose
 						file_list << folder.name
-						yield(folder.name, nil, nil, nil, nil) if block_given?
+						if(block_given?)
+							yield(folder.name, nil, nil, nil, nil, nil) 
+						end
 					
 						if((!folder.attr.include? :Noselect) && (folder_only==false))
 		
@@ -270,45 +268,72 @@ END
 					      a = @imap.fetch(message_id, "RFC822")
 					      mail = TMail::Mail.parse(a[0].attr["RFC822"])
 					      file_name = mail.subject.match(/^[^\[]+\[([^\]]+)\]/)[1]
-					      file_list << folder.name + "/" + file_name if file_name.match(glob)
-								yield(folder.name, file_name, message_id, mail, file_name) if block_given? && file_name.match(glob)
+								puts "Considering #{file_name}" if @verbose
+								
+								parts = mail.subject.match(/^[^\[]+\[[^\]]+\]\(([0-9]+)\-([0-9]+)\)/)
+								file_part = parts[1]
+								max_parts = parts[2]
+								if file_name.match(glob)
+					      	file_list << folder.name + "/" + file_name 
+									yield(folder.name, file_name, message_id, mail, file_part, max_parts) if block_given? 
+								end
 							end
 						end
 					end
 				end
-			rescue
-			end
+			#rescue
+			#end
 			
 			    file_list.sort
 		end
 		
-			  def ls(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
+		def ls(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
 			transverse(target_folder, glob, recursive, dot_files, false)
-			  end
+		end
 		
-			  def get_file(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
-			file_list = transverse(target_folder, glob, recursive, dot_files, false) do |folder, file, message_id, mail, file_name|
-				
-				if mail && mail.multipart? then
-				    mail.parts.each do |m|
-				      if !m.main_type
-								append_dir = folder.sub(/^#{target_folder}\/*/,"")
-								if append_dir != ""
-									Dir.mkdir(append_dir) if !File.exists? append_dir
-		
-									file_name = append_dir + "/" + file_name
-								end
-								File.open(file_name,"w").write(m.body)
+		def get_file(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
+			multipart_files = Hash.new
+			file_list = transverse(target_folder, glob, recursive, dot_files, false) do |folder, file_name, message_id, mail, file_part, max_parts|
+				if(file_name && mail.parts)	
+					mail.parts.each do |m|
+						if !m.main_type
+							append_dir = folder
+							append_dir.sub!(/^#{target_folder}\/*/,"")
+							if append_dir != ""
+								Dir.mkdir(append_dir) if !File.exists? append_dir		
+								file_name = append_dir + "/" + file_name
 							end
-				    end
+						
+						 	if(file_part)
+								multipart_files[file_name] = max_parts if !multipart_files[file_name]							
+						 		file_name = file_name + "_#{file_part}_#{max_parts}"
+						 	end
+							puts "Getting file #{file_name}" if @verbose	
+							
+							File.open(file_name,"w") do |f|
+								f.write(m.body)
+							end
+						end
+					end
 				end
 			end
-			  end
+			
+			multipart_files.each do |key,value|
+				puts "Fusing #{key} ---- #{value}" if @verbose
+				File.open(key,"w") do |f|
+					1.upto(value.to_i) do |step|
+						f.write(File.open("#{key}_#{step}_#{value}").read)
+						File.unlink("#{key}_#{step}_#{value}")
+					end
+				end
+			end
+			return file_list
+		end
 		
 		
 		
 			  def rm_file(target_folder = "INBOX", glob = /.+/, recursive = false, dot_files = false)
-			file_list = transverse(target_folder, glob, false, dot_files, false) do |folder, file, message_id, mail, file_name|
+			file_list = transverse(target_folder, glob, false, dot_files, false) do |folder, file_name, message_id, mail, file_part, max_parts|
 				if file && message_id
 			      	@imap.store(message_id, "+FLAGS", [:Deleted]) 
 					@imap.expunge
@@ -326,7 +351,7 @@ END
 			folders = []
 			puts "..... Deleting #{target_folder}" if @verbose
 			
-			transverse(target_folder, /.+/, recursive, dot_files, false) do |folder, file, message_id, mail, file_name|	
+			transverse(target_folder, /.+/, recursive, dot_files, false) do |folder, file, message_id, mail, file_part, max_parts|	
 				puts "..... assigning dir #{folder} for removal" if @verbose
 				folders << folder if !(folders.include? folder)
 				
