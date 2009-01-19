@@ -3,17 +3,21 @@ $LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__) + "/../lib"))
 
 require 'rubygems'
 require 'imapstore'
+require 'rdoc/ri/ri_paths'
 require 'getoptions'
 #old versions of ruby require this
-require 'rdoc/ri/ri_paths'
+
+def print_help
+	puts "Usage: imapstore -c <#{COMMAND_LIST.join(', ')}> -s <subject> -d <folder> -f <file list or glob> "
+	puts "                 -i <imapstore> -x --recursive --versioned --all -t <text of message> -p password"
+	puts "       imapstore -h"
+end
 
 COMMAND_LIST = ['ls', 'rm', 'put', 'get', 'rmdir', 'mkdir', 'quota', 'setup', 'snipplet' ]
 opt = GetOptions.new(%w( help password=s subject=s command=s dir=s files=@s recursive! versioned! all! imapstore:s x! text=s ))
 
 if opt['help']
-	puts "Usage: imapstore -c <#{COMMAND_LIST.join(', ')}> -s <subject> -d <folder> -f <file list or glob> "
-	puts "                 -i <imapstore> -x --recursive --versioned --all -t <text of message>"
-	puts "       imapstore -h"
+	print_help
 	exit 0
 end
 
@@ -116,4 +120,5 @@ end
 
 rescue
 	puts "An error has occured #{$!}"
+	print_help
 end

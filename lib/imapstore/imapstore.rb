@@ -86,6 +86,7 @@ END
 		end
 		
 	  def connect()
+			raise "No password given" if @password == nil
 	    if !@imap && @email && @password && @imap_server && @imap_port
 				if(@ssl == true)
 	      	@imap = Net::IMAP.new(@imap_server, @imap_port, true)
@@ -219,9 +220,9 @@ END
 		
 		end
 		
-			  def store_file( file, folder = "INBOX", subject = "")
+		def store_file( file, folder = "INBOX", subject = "")
 		
-			  	@imap.create(folder) if !@imap.list("", folder)
+			@imap.create(folder) if !@imap.list("", folder)
 		
 			size = File.size(file) 
 			if(size > MAX_FILE_SIZE)
