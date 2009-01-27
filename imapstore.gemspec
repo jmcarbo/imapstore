@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{imapstore}
-  s.version = "0.5.1"
+  s.version = "0.5.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Joan Marc Carbo Arnau"]
-  s.date = %q{2009-01-19}
+  s.date = %q{2009-01-27}
   s.default_executable = %q{imapstore}
   s.description = %q{ruby gem to use an imap server as a file storage device}
   s.email = ["jmcarbo@gmail.com"]
